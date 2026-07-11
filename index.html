@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Desktop duck</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #cfead9;
+  }
+  canvas {
+    display: block;
+  }
+  #hint {
+    position: fixed;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: sans-serif;
+    font-size: 13px;
+    color: #33553d;
+    opacity: 0.7;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="hint">the duck is wandering &mdash; close this tab to stop it</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+const FRAME_W = 32;
+const FRAME_H = 32;
+const NUM_FRAMES = 2;
+const SCALE = 4;
+const DRAW_W = FRAME_W * SCALE;
+const DRAW_H = FRAME_H * SCALE;
+
+const sprite = new Image();
+sprite.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAABACAYAAAB7jnWuAAABQElEQVR4AexYUQ7CIAyFfeoFjDcxXstjeC3jTYwX0E9nS4QQWKBhZXZLjc91La2PZ1mEwfz5pQRUgUyB1+0wcqLW4xmBWgJ3XAmsQ4H9+cn904d6JAVgVYQEbiMQGK/HEbG7DyYF95fG9QKB2LmkLYeAvTws4n36mBQ9FZGjQM9ZlmqrAqpApgA8920EA7ZH7I9tH8dr7Hd2qQExlhFA55IQT8CCGh5gTr59HK+TA0pO8QqUyLPEVIHtK1BrFFVAFZCnAOyC9HygtnRZ4/J6gHV6hGIkBfB/IaFW0xASAVgZTcUpSYEAng0g0rMBvKcUah0TCLQWmJsnhwCeDSDSswG8nzvLUr4cBUose8ZUAVUgUwCe+25f/7vint8j9pPtWgNnBGoJ3HHxBHDP78E9eVdPvAKOZc8PVWD9Csztjy8AAAD//5dfiiUAAAAGSURBVAMA2nPUgdbXVzcAAAAASUVORK5CYIIA";
+
+let frame = 0;
+let x = 100, y = 100;
+let targetX = 100, targetY = 100;
+
+function pickNewTarget() {
+  targetX = Math.random() * (canvas.width - DRAW_W);
+  targetY = Math.random() * (canvas.height - DRAW_H);
+}
+pickNewTarget();
+
+function tick() {
+  frame = (frame + 1) % NUM_FRAMES;
+
+  const dx = targetX - x;
+  const dy = targetY - y;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < 4) {
+    pickNewTarget();
+  } else {
+    x += dx > 0 ? 2 : (dx < 0 ? -2 : 0);
+    y += dy > 0 ? 1 : (dy < 0 ? -1 : 0);
+  }
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(
+    sprite,
+    0, frame * FRAME_H, FRAME_W, FRAME_H,
+    x, y, DRAW_W, DRAW_H
+  );
+}
+
+sprite.onload = function() {
+  setInterval(tick, 150);
+};
+</script>
+</body>
+</html>
